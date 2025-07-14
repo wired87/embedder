@@ -8,7 +8,7 @@ from functools import lru_cache
 @lru_cache(maxsize=1)
 def get_embedder(dim=7):
     if dim == 7:
-        model="all-mpnet-qf_core_base-v2"
+        model="all-mpnet-base-v2"
     else:
         model="all-MiniLM-L6-v2"
     return SentenceTransformer(model)
