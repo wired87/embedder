@@ -3,11 +3,11 @@ import json
 import numpy as np
 from functools import lru_cache
 EMBEDDER = None
+from sentence_transformers import SentenceTransformer
 
 @lru_cache(maxsize=1)
 def get_embedder(dim=7):
     if EMBEDDER is None:
-        from sentence_transformers import SentenceTransformer
         if dim == 7:
             model="all-mpnet-base-v2"
         else:
