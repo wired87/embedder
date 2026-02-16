@@ -22,11 +22,15 @@ EMBEDDER = get_embedder()
 def embed(text):
     if isinstance(text, dict):
         text=json.dumps(text)
-    return np.array(EMBEDDER.encode(str(text.lower())), dtype=np.float64).tolist()
+    return np.array(EMBEDDER.encode(str(text.lower())), dtype=np.float64)
 
-@lru_cache(maxsize=1)
-def similarity(vec1, vec2):
-    vec1 = np.array(vec1)
-    vec2 = np.array(vec2)
-    return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+
+@lru_cache(maxsize=128)  # maxsize=1 ist oft zu wenig für Embeddings
+def similarity(vec1_tuple, vec2_tuple):
+    # Wir wandeln die Tupel erst hier in Arrays um für die Berechnung
+    v1 = np.array(vec1_tuple)
+    v2 = np.array(vec2_tuple)
+
+    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+
 
