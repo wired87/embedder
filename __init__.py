@@ -1,18 +1,26 @@
 import json
+import os
 
 import numpy as np
 from functools import lru_cache
-EMBEDDER = None
-from sentence_transformers import SentenceTransformer
 
+os.environ["SENTENCE_TRANSFORMERS_HOME"] = "./embed_models"
+
+EMBEDDER = None
 @lru_cache(maxsize=1)
-def get_embedder(dim=7):
+def get_embedder(dim=3):
+    from sentence_transformers import SentenceTransformer
+    global EMBEDDER
+    try:
+        EMBEDDER = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
+    except Exception as e:
+        print("Err get embedder local", e, "download")
     if EMBEDDER is None:
         if dim == 7:
             model="all-mpnet-base-v2"
         else:
             model="all-MiniLM-L6-v2"
-        return SentenceTransformer(model)
+        model = SentenceTransformer(model)
     else:
         return EMBEDDER
 
@@ -25,12 +33,10 @@ def embed(text):
     return np.array(EMBEDDER.encode(str(text.lower())), dtype=np.float64)
 
 
-@lru_cache(maxsize=128)  # maxsize=1 ist oft zu wenig für Embeddings
+@lru_cache(maxsize=1024)
 def similarity(vec1_tuple, vec2_tuple):
-    # Wir wandeln die Tupel erst hier in Arrays um für die Berechnung
-    v1 = np.array(vec1_tuple)
-    v2 = np.array(vec2_tuple)
+    v1 = np.frombuffer(np.array(vec1_tuple, dtype=np.float32))
+    v2 = np.frombuffer(np.array(vec2_tuple, dtype=np.float32))
 
-    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-
+    return float(np.dot(v1, v2))
 
