@@ -4,7 +4,7 @@ import os
 import numpy as np
 from functools import lru_cache
 
-os.environ["SENTENCE_TRANSFORMERS_HOME"] = "./embed_models"
+os.environ["SENTENCE_TRANSFORMERS_HOME"] = os.path.abspath("embed_models")
 
 EMBEDDER = None
 @lru_cache(maxsize=1)
@@ -27,10 +27,12 @@ def get_embedder(dim=3):
 EMBEDDER = get_embedder()
 
 def embed(text):
-    if isinstance(text, dict):
-        text=json.dumps(text)
-    return np.array(EMBEDDER.encode(str(text.lower())), dtype=np.float64)
-
+    if EMBEDDER is not None:
+        if isinstance(text, dict):
+            text=json.dumps(text)
+        return np.array(EMBEDDER.encode(str(text.lower())), dtype=np.float64)
+    else:
+        print("Embedder ot avaialble...")
 
 import json
 import numpy as np
